@@ -1,246 +1,215 @@
 <!DOCTYPE html>
-<<<<<<< HEAD
 <html>
 <head>
-    <title>Clock</title>
+<title>Professional Clock</title>
 
-    <style>
-        body {
-            text-align: center;
-            font-family: Arial;
-            margin-top: 50px;
-        }
+<style>
 
-        #digitalClock {
-            font-size: 40px;
-            display: none;
-        }
-
-        canvas {
-            background: #f2f2f2;
-            border-radius: 50%;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
-        #analogClock {
-    display: none;
+body{
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+height:100vh;
+font-family:Arial;
+background:#f0f0f0;
 }
-    </style>
+
+h1{
+margin-bottom:10px;
+}
+
+#clock{
+width:320px;
+height:320px;
+border:8px solid black;
+border-radius:50%;
+position:relative;
+
+background-image:url("");
+background-size:cover;
+background-position:center;
+}
+
+.number{
+position:absolute;
+font-size:20px;
+font-weight:bold;
+color:black;
+transform:translate(-50%,-50%);
+}
+
+.hand{
+position:absolute;
+bottom:50%;
+left:50%;
+transform-origin:bottom;
+transform:translateX(-50%);
+}
+
+#hour{
+width:6px;
+height:70px;
+background:black;
+border-radius:5px;
+}
+
+#minute{
+width:4px;
+height:100px;
+background:black;
+border-radius:5px;
+}
+
+#second{
+width:2px;
+height:120px;
+background:red;
+}
+
+.center{
+position:absolute;
+width:14px;
+height:14px;
+background:black;
+border-radius:50%;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+}
+
+#digital{
+font-size:40px;
+margin-top:20px;
+display:none;
+}
+
+select{
+margin-top:20px;
+padding:10px;
+font-size:16px;
+}
+
+</style>
 </head>
 
 <body>
 
-    <button onclick="toggleClock()">Press Button</button>
+<h1>Professional Clock</h1>
 
-    <div id="digitalClock"></div>
+<select onchange="changeClock(this.value)">
+<option value="analog">Analog Clock</option>
+<option value="digital">Digital Clock</option>
+</select>
 
-    <canvas id="analogClock" width="200" height="200"></canvas>
+<div id="clock">
+
+<div id="hour" class="hand"></div>
+<div id="minute" class="hand"></div>
+<div id="second" class="hand"></div>
+
+<div class="center"></div>
+
+</div>
+
+<div id="digital"></div>
+
 
 <script>
-/////////////////////////////////////////////////
-// TOGGLE BUTTON + CONTROL INTERVALS
-/////////////////////////////////////////////////
 
-let isDigital = false;
-let digitalInterval;
-let analogInterval;
+let clock = document.getElementById("clock");
 
-function toggleClock() {
-    isDigital = !isDigital;
+/* AUTO CREATE NUMBERS */
 
-    let digital = document.getElementById("digitalClock");
-    let analog = document.getElementById("analogClock");
+for(let i=1;i<=12;i++){
 
-    if (isDigital) {
-        digital.style.display = "block";
-        analog.style.display = "none";
+let num = document.createElement("div");
 
-        clearInterval(analogInterval);
-        digitalInterval = setInterval(showDigitalClock, 1000);
+num.className="number";
 
-    } else {
-        digital.style.display = "none";
-        analog.style.display = "block";
+num.innerText=i;
+ 
 
-        clearInterval(digitalInterval);
-        analogInterval = setInterval(drawClock, 1000);
-    }
+
+//  360 ÷ 12 = 30°
+let angle = i * 30;
+
+
+
+// 320 ÷ 2 = 160px     // center point
+// Thoda andar rakhne ke liye 130 use kiya
+let radius = 130;
+
+
+
+
+// /"Circle ke andar number ki horizontal position nikaalne ka formula"///
+let x = 160 + radius * Math.sin(angle*Math.PI/180);
+
+
+
+// "Circle ke andar number ki vertical position nikaalne ka formula"
+let y = 160 - radius * Math.cos(angle*Math.PI/180);
+
+
+
+
+num.style.left = x + "px";
+num.style.top = y + "px";
+
+
+
+// Ye number ko clock container ke andar HTML me add karta hai
+clock.appendChild(num);
+
 }
 
-/////////////////////////////////////////////////
-// DIGITAL CLOCK
-/////////////////////////////////////////////////
+/* CLOCK FUNCTION */
 
-function showDigitalClock() {
-    let date = new Date();
+function updateClock(){
 
-    let h = date.getHours();
-    let m = date.getMinutes();
-    let s = date.getSeconds();
+let now = new Date();
 
-    h = h < 10 ? "0" + h : h;
-    m = m < 10 ? "0" + m : m;
-    s = s < 10 ? "0" + s : s;
+let h = now.getHours();
+let m = now.getMinutes();
+let s = now.getSeconds();
 
-    document.getElementById("digitalClock").innerText =
-        h + ":" + m + ":" + s;
+document.getElementById("digital").innerHTML =
+h + ":" + m + ":" + s;
+
+let hDeg = (h % 12) * 30 + m * 0.5;           //   To 1 hour = 30°
+ let mDeg = m * 6;                           //  To 1 minute = 6°
+let sDeg = s * 6;                             //To 1 second = 6°
+
+document.getElementById("hour").style.transform =
+"translateX(-50%) rotate("+hDeg+"deg)";
+
+document.getElementById("minute").style.transform =
+"translateX(-50%) rotate("+mDeg+"deg)";
+
+document.getElementById("second").style.transform =
+"translateX(-50%) rotate("+sDeg+"deg)";
+
 }
 
-/////////////////////////////////////////////////
-// ANALOG CLOCK
-/////////////////////////////////////////////////
+updateClock();
+setInterval(updateClock,1000);                         //1000 → har 1000ms (1 second) ke baad ye function automatically call hoga//
 
-let canvas = document.getElementById("analogClock");
-let ctx = canvas.getContext("2d");
+/* SWITCH CLOCK */
 
-let radius = canvas.height / 2;
-ctx.translate(radius, radius);
-radius = radius * 0.90;
+function changeClock(type){
 
-function drawClock() {
-    ctx.clearRect(-canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
-
-    drawFace();
-    drawNumbers();
-    drawTime();
+if(type=="digital"){
+clock.style.display="none";
+document.getElementById("digital").style.display="block";
+}else{
+clock.style.display="block";
+document.getElementById("digital").style.display="none";
 }
 
-function drawFace() {
-    ctx.beginPath();
-    ctx.arc(0, 0, radius, 0, 2 * Math.PI);
-    ctx.fillStyle = "white";
-    ctx.fill();
-    ctx.stroke();
-}
-
-function drawNumbers() {
-    ctx.font = radius * 0.15 + "px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    for (let num = 1; num <= 12; num++) {
-        let angle = num * Math.PI / 6;
-
-        let x = Math.cos(angle - Math.PI / 2) * radius * 0.8;
-        let y = Math.sin(angle - Math.PI / 2) * radius * 0.8;
-
-        ctx.fillText(num, x, y);
-    }
-}
-
-function drawTime() {
-    let now = new Date();
-
-    let hour = now.getHours();
-    let minute = now.getMinutes();
-    let second = now.getSeconds();
-
-    hour = hour % 12;
-    hour = (hour * Math.PI / 6) +
-           (minute * Math.PI / (6 * 60)) +
-           (second * Math.PI / (360 * 60));
-    drawHand(hour, radius * 0.5, 6);
-
-    minute = (minute * Math.PI / 30) +
-             (second * Math.PI / (30 * 60));
-    drawHand(minute, radius * 0.8, 4);
-
-    second = (second * Math.PI / 30);
-    drawHand(second, radius * 0.9, 2);
-}
-
-function drawHand(pos, length, width) {
-    ctx.beginPath();
-    ctx.lineWidth = width;
-    ctx.moveTo(0, 0);
-
-    let x = Math.cos(pos - Math.PI / 2) * length;
-    let y = Math.sin(pos - Math.PI / 2) * length;
-
-    ctx.lineTo(x, y);
-    ctx.stroke();
 }
 
 </script>
 
 </body>
 </html>
-=======
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="author" content="Mavia abbas">
-    <meta name="description" content="Use the domain checker to search for domain availabllity. Check the search result instantly to buy a domain name for your online project today.US$0.01 to US$31.99">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="./style.css">
-    <link rel="icon" href="./assets/Capture.PNG">
-    <style>
-        *  { 
-            margin: 0;
-            padding: 0;
-        }
-        h2{
-            border-width: 5px;
-            border-style: dotted;
-            border-color: red;
-            border:4px dashed aquamarine;
-        }
-        .p {
-            border: 2px solid #0067ab;
-            /* margin-top: 10px;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            margin-left: 10px; */
-            /* margin: 10px 20px 30px 40px; */
-            /* margin: 10px 20px; */
-            /* margin: 10px; */
-            /* padding-top: 10px; */
-        }
-    </style>         
-</head>
-<body>
-    <!-- <h1 style="color:red;background-color:aqua">hello my dear class</h1>
-    <p class="p">hello paragraph class</p>
-    <h2>hello Master class</h2>
-
-    <br> -->
-
-    <!-- <h3>hello external css</h3> -->
-
-    <!-- <div class="box">
-        <div class="box1">hhhh</div>
-        <div class="box2"></div>
-        <h4 class="h4">hello world</h4>
-    </div>
-    <br>
-    <hr>
-    <div style="background-color: red;">hello world</div> -->
-
-    <!-- <nav>
-        hello world
-    </nav>
-    <p>hi my good class</p>
-    <p style="margin-top: 1000px;">hello paragraph</p> -->
-
-    <!-- <span style="margin-left: 400px;">hello world</span>
-    <p>hey abdullah how are you</p> -->
-
-    <div class="nav">
-        <h1>LOGO</h1>
-        <ul>
-            <li><a href="#">Home</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Contact us</a></li>
-        </ul>
-    </div>
-
-    
-</body>
-</html
->>>>>>> 12e6786610e8cb636dd5db54d98cbea9539952b0
